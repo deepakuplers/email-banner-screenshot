@@ -12,10 +12,10 @@
   "author": "Uplers/Mavlers",
   "license": "MIT",
   "dependencies": {
-    "puppeteer-core": "^19.11.1",
-    "chrome-aws-lambda": "^10.1.0"
+    "puppeteer-core": "^21.5.2",
+    "@sparticuz/chromium": "^119.0.2"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": "18.x"
   }
 }

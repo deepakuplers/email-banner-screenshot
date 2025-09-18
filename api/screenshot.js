@@ -1,6 +1,6 @@
-// api/screenshot.js - Vercel Serverless Function
+// api/screenshot.js - Vercel Serverless Function with @sparticuz/chromium
 const puppeteer = require('puppeteer-core');
-const chromium = require('chrome-aws-lambda');
+const chromium = require('@sparticuz/chromium');
 
 export default async function handler(req, res) {
     // Set CORS headers for all requests
@@ -41,26 +41,33 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: 'HTML/CSS code is required' });
         }
 
-        // Launch Puppeteer with Vercel-compatible settings
+        // Configure Chromium for Vercel
+        const isLocal = process.env.NODE_ENV !== 'production';
+        
+        // Launch Puppeteer with @sparticuz/chromium
         const browser = await puppeteer.launch({
-            args: [
-                ...chromium.args,
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--no-first-run',
-                '--no-zygote',
-                '--single-process',
-                '--disable-extensions',
-            ],
+            args: isLocal 
+                ? []
+                : [
+                    ...chromium.args,
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--disable-extensions',
+                    '--hide-scrollbars',
+                    '--disable-web-security',
+                    '--no-first-run'
+                ],
             defaultViewport: {
                 width: 1200,
                 height: 800,
                 deviceScaleFactor: 2
             },
-            executablePath: await chromium.executablePath,
-            headless: chromium.headless,
+            executablePath: isLocal
+                ? undefined
+                : await chromium.executablePath(),
+            headless: true,
             ignoreHTTPSErrors: true,
         });
 
