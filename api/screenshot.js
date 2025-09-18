@@ -3,17 +3,27 @@ const puppeteer = require('puppeteer-core');
 const chromium = require('chrome-aws-lambda');
 
 export default async function handler(req, res) {
-    // Set CORS headers
+    // Set CORS headers for all requests
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400');
 
     // Handle preflight OPTIONS request
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
-    // Only allow POST requests
+    // Handle GET request (for testing)
+    if (req.method === 'GET') {
+        return res.status(200).json({ 
+            message: 'Screenshot API is running',
+            status: 'healthy',
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    // Only allow POST requests for screenshot generation
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
     }
@@ -42,6 +52,7 @@ export default async function handler(req, res) {
                 '--no-first-run',
                 '--no-zygote',
                 '--single-process',
+                '--disable-extensions',
             ],
             defaultViewport: {
                 width: 1200,
@@ -69,7 +80,7 @@ export default async function handler(req, res) {
                 timeout: 15000
             });
             
-            // Wait a bit more for any CSS animations/transitions
+            // Wait for any CSS animations/transitions
             await page.waitForTimeout(1000);
         } catch (contentError) {
             await browser.close();
@@ -92,7 +103,7 @@ export default async function handler(req, res) {
         // Set response headers for image
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Content-Length', screenshotBuffer.length);
-        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         
         // Send the screenshot
         return res.send(screenshotBuffer);
