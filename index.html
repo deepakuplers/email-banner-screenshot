@@ -21,6 +21,7 @@
             line-height: 1.6;
         }
 
+        /* Header */
         .header {
             text-align: center;
             padding: 40px 20px;
@@ -41,6 +42,7 @@
             font-weight: 300;
         }
 
+        /* Container */
         .container {
             max-width: 100%;
             padding: 0 20px 40px;
@@ -55,6 +57,7 @@
             margin: 0 auto;
         }
 
+        /* Cards */
         .card {
             background: white;
             border-radius: 20px;
@@ -100,25 +103,36 @@
             color: #2d3748;
         }
 
-        .error-alert {
+        /* Server Status */
+        .server-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .server-status.online {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #276749;
+        }
+
+        .server-status.offline {
             background: #fed7d7;
             border: 1px solid #feb2b2;
             color: #742a2a;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: none;
         }
 
-        .error-alert.show {
-            display: block;
-            animation: slideInDown 0.3s ease-out;
+        .server-status.checking {
+            background: #fefcbf;
+            border: 1px solid #f6e05e;
+            color: #744210;
         }
 
-        .error-alert i {
-            margin-right: 10px;
-        }
-
+        /* Input Section */
         .code-input-wrapper {
             position: relative;
             margin-bottom: 20px;
@@ -150,11 +164,7 @@
             font-style: italic;
         }
 
-        .code-input.error {
-            border-color: #f56565;
-            background: #fed7d7;
-        }
-
+        /* Buttons */
         .btn {
             width: 100%;
             padding: 15px 25px;
@@ -170,7 +180,6 @@
             gap: 10px;
             position: relative;
             overflow: hidden;
-            margin-bottom: 15px;
         }
 
         .btn-primary {
@@ -195,23 +204,13 @@
             box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
         }
 
-        .btn-next {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3);
-        }
-
-        .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
-        }
-
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
         }
 
+        /* Loading Animation */
         .loading {
             display: none;
             margin-left: 10px;
@@ -227,17 +226,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* Output Section */
         .output-container {
             min-height: 300px;
             display: flex;
@@ -286,6 +275,7 @@
             display: block;
         }
 
+        /* Stats */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -321,28 +311,7 @@
             margin-top: 5px;
         }
 
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 12px;
-            padding: 15px 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            transform: translateX(400px);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            border-left: 4px solid #48bb78;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.error {
-            border-left-color: #f56565;
-        }
-
+        /* Animations */
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -376,6 +345,31 @@
             }
         }
 
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border-left: 4px solid #48bb78;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            border-left-color: #f56565;
+        }
+
+        /* Responsive Design */
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -416,6 +410,25 @@
                 gap: 15px;
             }
         }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 15px 30px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.95rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -433,10 +446,10 @@
                     <h2>Code Input</h2>
                 </div>
 
-                <!-- Error Alert -->
-                <div class="error-alert" id="errorAlert">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span id="errorMessage">Your code contains errors. Please fix them before generating a screenshot.</span>
+                <!-- Server Status -->
+                <div class="server-status checking" id="serverStatus">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Checking server connection...</span>
                 </div>
                 
                 <div class="code-input-wrapper">
@@ -477,11 +490,6 @@
                     <i class="fas fa-magic"></i>
                     Generate Screenshot
                     <i class="fas fa-spinner loading" id="loadingSpinner"></i>
-                </button>
-
-                <button class="btn btn-next" id="nextButton" style="display:none;">
-                    <i class="fas fa-forward"></i>
-                    Next Screenshot
                 </button>
 
                 <div class="stats">
@@ -529,80 +537,53 @@
 
     <script>
         let totalGenerated = 0;
-        let lastDownloaded = false;
+        let apiEndpoint = '';
+        let serverOnline = false;
 
-        // HTML/CSS Validation
-        function validateCode(code) {
-            const errors = [];
+        // Determine the correct API endpoint
+        function getApiEndpoint() {
+            const hostname = window.location.hostname;
             
-            // Basic HTML structure validation
-            if (!code.toLowerCase().includes('<!doctype html>') && !code.toLowerCase().includes('<!doctype')) {
-                errors.push('Missing DOCTYPE declaration');
+            // If running on Vercel
+            if (hostname.includes('vercel.app') || hostname.includes('vercel.com')) {
+                return `${window.location.protocol}//${window.location.host}/api/screenshot`;
             }
             
-            if (!code.toLowerCase().includes('<html')) {
-                errors.push('Missing <html> tag');
+            // If running on custom domain  
+            if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                return `${window.location.protocol}//${window.location.host}/api/screenshot`;
             }
             
-            if (!code.toLowerCase().includes('</html>')) {
-                errors.push('Missing closing </html> tag');
-            }
-            
-            if (!code.toLowerCase().includes('<head')) {
-                errors.push('Missing <head> section');
-            }
-            
-            if (!code.toLowerCase().includes('<body')) {
-                errors.push('Missing <body> section');
-            }
+            // Local development
+            return `${window.location.protocol}//${window.location.host}/api/screenshot`;
+        }
 
-            // Check for common syntax errors
-            const openTags = code.match(/<[^/][^>]*>/g) || [];
-            const closeTags = code.match(/<\/[^>]*>/g) || [];
+        // Check server status
+        async function checkServerStatus() {
+            const serverStatus = document.getElementById('serverStatus');
+            apiEndpoint = getApiEndpoint();
             
-            // Basic tag balance check (simplified)
-            if (Math.abs(openTags.length - closeTags.length) > 3) {
-                errors.push('Possible unclosed HTML tags detected');
-            }
-
-            // CSS syntax validation (basic)
-            const styleContent = code.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
-            if (styleContent) {
-                styleContent.forEach(style => {
-                    const cssContent = style.replace(/<\/?style[^>]*>/gi, '');
-                    const openBraces = (cssContent.match(/{/g) || []).length;
-                    const closeBraces = (cssContent.match(/}/g) || []).length;
-                    
-                    if (openBraces !== closeBraces) {
-                        errors.push('CSS syntax error: Mismatched braces in <style> block');
-                    }
+            try {
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: '<html><body><h1>Test</h1></body></html>', apiKey: '1234' })
                 });
+                
+                if (response.ok || response.status === 400) { // 400 is OK for our test
+                    serverOnline = true;
+                    serverStatus.className = 'server-status online';
+                    serverStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Server is online and ready!</span>';
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                serverOnline = false;
+                serverStatus.className = 'server-status offline';
+                serverStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Server offline. Please check your backend.</span>`;
             }
-
-            return errors;
-        }
-
-        function showError(message) {
-            const errorAlert = document.getElementById('errorAlert');
-            const errorMessage = document.getElementById('errorMessage');
-            const codeInput = document.getElementById('codeInput');
-            
-            errorMessage.textContent = message;
-            errorAlert.classList.add('show');
-            codeInput.classList.add('error');
-            
-            // Hide error after 5 seconds
-            setTimeout(() => {
-                hideError();
-            }, 5000);
-        }
-
-        function hideError() {
-            const errorAlert = document.getElementById('errorAlert');
-            const codeInput = document.getElementById('codeInput');
-            
-            errorAlert.classList.remove('show');
-            codeInput.classList.remove('error');
         }
 
         // Update stats
@@ -626,31 +607,12 @@
             }, 4000);
         }
 
-        // Clear previous screenshot
-        function clearPreviousScreenshot() {
-            const placeholder = document.getElementById('placeholder');
-            const generatedImage = document.getElementById('generatedImage');
-            const outputContainer = document.getElementById('outputContainer');
-            const downloadButton = document.getElementById('downloadButton');
-            const nextButton = document.getElementById('nextButton');
-            
-            placeholder.style.display = 'flex';
-            generatedImage.classList.remove('show');
-            outputContainer.classList.remove('has-image');
-            downloadButton.style.display = 'none';
-            nextButton.style.display = 'none';
-            lastDownloaded = false;
-        }
-
         // Update stats on input
-        document.getElementById('codeInput').addEventListener('input', function() {
-            updateStats();
-            hideError(); // Hide error when user starts typing
-        });
+        document.getElementById('codeInput').addEventListener('input', updateStats);
 
         // Generate screenshot
         document.getElementById('generateButton').addEventListener('click', async function() {
-            const codeInput = document.getElementById('codeInput').value;
+            const codeInput = document.getElementById('codeInput').value.trim();
             const generateButton = this;
             const loadingSpinner = document.getElementById('loadingSpinner');
             const outputContainer = document.getElementById('outputContainer');
@@ -658,20 +620,15 @@
             const generatedImage = document.getElementById('generatedImage');
             const downloadButton = document.getElementById('downloadButton');
 
-            if (codeInput.trim() === "") {
+            if (codeInput === "") {
                 showToast("Please enter some HTML & CSS code first!", true);
                 return;
             }
 
-            // Validate code before generating
-            const errors = validateCode(codeInput);
-            if (errors.length > 0) {
-                showError(`Code validation failed: ${errors[0]}`);
-                showToast("Please fix the code errors before generating a screenshot.", true);
+            if (!serverOnline) {
+                showToast("Server is not available. Please check your backend deployment.", true);
                 return;
             }
-
-            hideError();
 
             // Show loading state
             generateButton.disabled = true;
@@ -679,7 +636,7 @@
             generateButton.innerHTML = '<i class="fas fa-spinner loading active"></i> Generating Screenshot...';
 
             try {
-                const response = await fetch('/api/html-screenshot', {
+                const response = await fetch(apiEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -688,14 +645,14 @@
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `Server error: ${response.status}`);
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
                 }
 
                 const imageBlob = await response.blob();
                 const imageUrl = URL.createObjectURL(imageBlob);
                 
-                // Hide placeholder and show image
+                // Display the screenshot
                 placeholder.style.display = 'none';
                 generatedImage.src = imageUrl;
                 generatedImage.classList.add('show');
@@ -706,23 +663,21 @@
                 totalGenerated++;
                 document.getElementById('totalGenerated').textContent = totalGenerated;
                 
-                // Setup download
+                // Setup download functionality
                 downloadButton.onclick = function() {
                     const a = document.createElement('a');
                     a.href = imageUrl;
-                    a.download = `html-css-screenshot-${Date.now()}.png`;
+                    a.download = `screenshot-${Date.now()}.png`;
+                    document.body.appendChild(a);
                     a.click();
+                    document.body.removeChild(a);
                     showToast("Screenshot downloaded successfully!");
-                    
-                    // Show Next Screenshot button after download
-                    lastDownloaded = true;
-                    document.getElementById('nextButton').style.display = 'block';
                 };
 
                 showToast("Screenshot generated successfully!");
 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Screenshot generation error:', error);
                 showToast(`Failed to generate screenshot: ${error.message}`, true);
             } finally {
                 // Reset button state
@@ -732,22 +687,15 @@
             }
         });
 
-        // Next Screenshot button
-        document.getElementById('nextButton').addEventListener('click', function() {
-            clearPreviousScreenshot();
-            document.getElementById('codeInput').focus();
-            showToast("Ready for your next screenshot! Update your code and click Generate.");
-        });
-
-        // Initialize stats
-        updateStats();
-
-        // Add sample code on load for demo
+        // Initialize
         window.addEventListener('load', function() {
-            setTimeout(() => {
-                updateStats();
-            }, 100);
+            updateStats();
+            checkServerStatus();
         });
+
+        setTimeout(() => {
+            updateStats();
+        }, 500);
     </script>
 </body>
 </html>
