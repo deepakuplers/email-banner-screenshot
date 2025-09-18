@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML & CSS Screenshot Generator - Vercel Ready</title>
+    <title>HTML & CSS Screenshot Generator - Professional Tool by Uplers/Mavlers</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -41,35 +40,6 @@
             font-size: 1.2rem;
             opacity: 0.9;
             font-weight: 300;
-        }
-
-        .mode-toggle {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .mode-btn {
-            padding: 10px 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            font-size: 0.9rem;
-        }
-
-        .mode-btn.active {
-            background: rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.8);
-            transform: scale(1.05);
-        }
-
-        .mode-btn:hover {
-            background: rgba(255,255,255,0.15);
         }
 
         /* Container */
@@ -305,18 +275,6 @@
             display: block;
         }
 
-        /* Preview Frame - Hidden */
-        .preview-frame {
-            position: fixed;
-            left: -9999px;
-            top: -9999px;
-            width: 1200px;
-            height: 800px;
-            background: white;
-            border: none;
-            z-index: -1;
-        }
-
         /* Stats */
         .stats {
             display: grid;
@@ -351,37 +309,6 @@
             font-size: 0.9rem;
             color: #718096;
             margin-top: 5px;
-        }
-
-        /* Quality Options */
-        .quality-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .quality-btn {
-            padding: 8px 16px;
-            border: 2px solid #e2e8f0;
-            background: #f8fafc;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-            flex: 1;
-            text-align: center;
-            min-width: 80px;
-        }
-
-        .quality-btn.active {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-        }
-
-        .quality-btn:hover {
-            border-color: #667eea;
         }
 
         /* Animations */
@@ -482,11 +409,6 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 15px;
             }
-
-            .mode-toggle {
-                flex-direction: column;
-                align-items: center;
-            }
         }
 
         @media (max-width: 480px) {
@@ -506,10 +428,6 @@
                 padding: 12px 20px;
                 font-size: 0.95rem;
             }
-            
-            .quality-options {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -517,15 +435,6 @@
     <header class="header">
         <h1><i class="fas fa-camera-retro"></i> HTML & CSS Screenshot Generator</h1>
         <p>Transform your code into beautiful screenshots instantly • Professional Tool by Uplers/Mavlers</p>
-        
-        <div class="mode-toggle">
-            <div class="mode-btn active" data-mode="server">
-                <i class="fas fa-server"></i> Server Mode (Higher Quality)
-            </div>
-            <div class="mode-btn" data-mode="client">
-                <i class="fas fa-desktop"></i> Client Mode (No Backend)
-            </div>
-        </div>
     </header>
 
     <div class="container">
@@ -537,8 +446,8 @@
                     <h2>Code Input</h2>
                 </div>
 
-                <!-- Server Status (only in server mode) -->
-                <div class="server-status checking" id="serverStatus" style="display: block;">
+                <!-- Server Status -->
+                <div class="server-status checking" id="serverStatus">
                     <i class="fas fa-spinner fa-spin"></i>
                     <span>Checking server connection...</span>
                 </div>
@@ -575,13 +484,6 @@
 </body>
 </html>"
                     ></textarea>
-                </div>
-
-                <!-- Quality Options (client mode only) -->
-                <div class="quality-options" id="qualityOptions" style="display: none;">
-                    <div class="quality-btn active" data-scale="1">Standard</div>
-                    <div class="quality-btn" data-scale="2">HD</div>
-                    <div class="quality-btn" data-scale="3">Ultra HD</div>
                 </div>
 
                 <button class="btn btn-primary" id="generateButton">
@@ -630,56 +532,30 @@
         </div>
     </div>
 
-    <!-- Hidden Preview Frame (client mode only) -->
-    <iframe id="previewFrame" class="preview-frame"></iframe>
-
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
     <script>
         let totalGenerated = 0;
-        let selectedScale = 1;
-        let currentMode = 'server';
         let apiEndpoint = '';
         let serverOnline = false;
-
-        // Mode switching
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentMode = this.dataset.mode;
-                toggleMode();
-            });
-        });
-
-        function toggleMode() {
-            const serverStatus = document.getElementById('serverStatus');
-            const qualityOptions = document.getElementById('qualityOptions');
-            
-            if (currentMode === 'server') {
-                serverStatus.style.display = 'block';
-                qualityOptions.style.display = 'none';
-                checkServerStatus();
-            } else {
-                serverStatus.style.display = 'none';
-                qualityOptions.style.display = 'flex';
-            }
-        }
 
         // Determine the correct API endpoint
         function getApiEndpoint() {
             const hostname = window.location.hostname;
             
+            // If running on Vercel
             if (hostname.includes('vercel.app') || hostname.includes('vercel.com')) {
                 return `${window.location.protocol}//${window.location.host}/api/screenshot`;
             }
             
+            // If running on custom domain  
             if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
                 return `${window.location.protocol}//${window.location.host}/api/screenshot`;
             }
             
-            return 'http://localhost:3000/api/screenshot';
+            // Local development
+            return `${window.location.protocol}//${window.location.host}/api/screenshot`;
         }
 
         // Check server status
@@ -693,21 +569,20 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ code: '', apiKey: '1234' })
+                    body: JSON.stringify({ code: '<html><body><h1>Test</h1></body></html>', apiKey: '1234' })
                 });
                 
-                serverOnline = response.status !== 404;
-                serverStatus.className = 'server-status online';
-                serverStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Server is online and ready!</span>';
+                if (response.ok || response.status === 400) { // 400 is OK for our test
+                    serverOnline = true;
+                    serverStatus.className = 'server-status online';
+                    serverStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Server is online and ready!</span>';
+                } else {
+                    throw new Error('Server not responding');
+                }
             } catch (error) {
                 serverOnline = false;
                 serverStatus.className = 'server-status offline';
-                serverStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Server offline. Using client mode instead.</span>`;
-                
-                // Auto-switch to client mode if server is down
-                setTimeout(() => {
-                    document.querySelector('[data-mode="client"]').click();
-                }, 2000);
+                serverStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Server offline. Please check your backend.</span>`;
             }
         }
 
@@ -732,95 +607,10 @@
             }, 4000);
         }
 
-        // Quality selection (client mode)
-        document.querySelectorAll('.quality-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                selectedScale = parseInt(this.dataset.scale);
-            });
-        });
-
         // Update stats on input
         document.getElementById('codeInput').addEventListener('input', updateStats);
 
-        // Server-side screenshot generation
-        async function generateServerScreenshot(codeInput) {
-            const response = await fetch(apiEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code: codeInput, apiKey: '1234' })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status} - ${response.statusText}`);
-            }
-
-            return response.blob();
-        }
-
-        // Client-side screenshot generation
-        async function generateClientScreenshot(codeInput) {
-            const previewFrame = document.getElementById('previewFrame');
-            
-            if (!codeInput.toLowerCase().includes('<html') || !codeInput.toLowerCase().includes('</html>')) {
-                throw new Error('Please provide a complete HTML document with <html> tags!');
-            }
-
-            const blob = new Blob([codeInput], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-
-            previewFrame.src = url;
-
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    reject(new Error('Timeout loading HTML content'));
-                }, 10000);
-
-                previewFrame.onload = () => {
-                    clearTimeout(timeout);
-                    setTimeout(resolve, 1000);
-                };
-
-                previewFrame.onerror = () => {
-                    clearTimeout(timeout);
-                    reject(new Error('Failed to load HTML content'));
-                };
-            });
-
-            const iframeDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-            const body = iframeDoc.body;
-
-            if (!body) {
-                throw new Error('Invalid HTML structure - no body element found');
-            }
-
-            const options = {
-                scale: selectedScale,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                width: Math.max(body.scrollWidth, 1200),
-                height: Math.max(body.scrollHeight, 800),
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: 1200,
-                windowHeight: 800
-            };
-
-            const canvas = await html2canvas(body, options);
-            
-            return new Promise((resolve) => {
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                    URL.revokeObjectURL(url);
-                }, 'image/png', 0.95);
-            });
-        }
-
-        // Main screenshot generation function
+        // Generate screenshot
         document.getElementById('generateButton').addEventListener('click', async function() {
             const codeInput = document.getElementById('codeInput').value.trim();
             const generateButton = this;
@@ -835,9 +625,8 @@
                 return;
             }
 
-            if (currentMode === 'server' && !serverOnline) {
-                showToast("Server is not available. Switching to client mode.", true);
-                document.querySelector('[data-mode="client"]').click();
+            if (!serverOnline) {
+                showToast("Server is not available. Please check your backend deployment.", true);
                 return;
             }
 
@@ -847,14 +636,20 @@
             generateButton.innerHTML = '<i class="fas fa-spinner loading active"></i> Generating Screenshot...';
 
             try {
-                let imageBlob;
-                
-                if (currentMode === 'server') {
-                    imageBlob = await generateServerScreenshot(codeInput);
-                } else {
-                    imageBlob = await generateClientScreenshot(codeInput);
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: codeInput, apiKey: '1234' })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorText}`);
                 }
 
+                const imageBlob = await response.blob();
                 const imageUrl = URL.createObjectURL(imageBlob);
                 
                 // Display the screenshot
@@ -879,7 +674,7 @@
                     showToast("Screenshot downloaded successfully!");
                 };
 
-                showToast(`Screenshot generated successfully using ${currentMode} mode!`);
+                showToast("Screenshot generated successfully!");
 
             } catch (error) {
                 console.error('Screenshot generation error:', error);
@@ -895,8 +690,7 @@
         // Initialize
         window.addEventListener('load', function() {
             updateStats();
-            toggleMode();
-            showToast("Ready! Choose server mode for higher quality or client mode for reliability.");
+            checkServerStatus();
         });
 
         setTimeout(() => {

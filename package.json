@@ -1,19 +1,21 @@
 {
   "name": "email-banner-screenshot",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "HTML & CSS Screenshot Generator - Professional Tool by Uplers/Mavlers",
+  "main": "api/screenshot.js",
   "scripts": {
     "dev": "vercel dev",
     "build": "echo 'No build step required'",
     "start": "vercel --prod"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["screenshot", "html", "css", "generator", "puppeteer"],
+  "author": "Uplers/Mavlers",
+  "license": "MIT",
   "dependencies": {
-    "body-parser": "^2.2.0",
-    "express": "^5.1.0",
-    "puppeteer": "^24.22.0"
+    "puppeteer-core": "^19.11.1",
+    "chrome-aws-lambda": "^10.1.0"
+  },
+  "engines": {
+    "node": ">=18.x"
   }
 }

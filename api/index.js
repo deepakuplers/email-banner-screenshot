@@ -1,21 +1,21 @@
-// api/screenshot.js - Vercel serverless function
+// api/screenshot.js - Vercel Serverless Function
 const puppeteer = require('puppeteer-core');
 const chromium = require('chrome-aws-lambda');
 
 export default async function handler(req, res) {
-    // Only allow POST requests
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method not allowed' });
-    }
-
-    // Enable CORS
+    // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle preflight requests
+    // Handle preflight OPTIONS request
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
+    }
+
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method not allowed' });
     }
 
     try {
@@ -31,10 +31,23 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: 'HTML/CSS code is required' });
         }
 
-        // Launch Puppeteer with chrome-aws-lambda for Vercel
+        // Launch Puppeteer with Vercel-compatible settings
         const browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
+            args: [
+                ...chromium.args,
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-first-run',
+                '--no-zygote',
+                '--single-process',
+            ],
+            defaultViewport: {
+                width: 1200,
+                height: 800,
+                deviceScaleFactor: 2
+            },
             executablePath: await chromium.executablePath,
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
@@ -49,29 +62,37 @@ export default async function handler(req, res) {
             deviceScaleFactor: 2
         });
 
-        // Set content with error handling
+        // Set content with better error handling
         try {
             await page.setContent(code, {
-                waitUntil: 'networkidle0',
-                timeout: 10000
+                waitUntil: ['networkidle0', 'domcontentloaded'],
+                timeout: 15000
             });
+            
+            // Wait a bit more for any CSS animations/transitions
+            await page.waitForTimeout(1000);
         } catch (contentError) {
             await browser.close();
-            return res.status(400).json({ message: 'Invalid HTML content' });
+            return res.status(400).json({ 
+                message: 'Invalid HTML content or timeout',
+                error: contentError.message 
+            });
         }
 
-        // Take screenshot
+        // Take screenshot with optimized settings
         const screenshotBuffer = await page.screenshot({
             fullPage: true,
             type: 'png',
-            quality: 90
+            quality: 100,
+            omitBackground: false,
         });
 
         await browser.close();
 
-        // Set response headers
+        // Set response headers for image
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Content-Length', screenshotBuffer.length);
+        res.setHeader('Cache-Control', 'no-cache');
         
         // Send the screenshot
         return res.send(screenshotBuffer);
