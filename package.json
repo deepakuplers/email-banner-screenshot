@@ -2,7 +2,7 @@
   "name": "email-banner-screenshot",
   "version": "1.0.0",
   "description": "HTML & CSS Screenshot Generator - Professional Tool by Uplers/Mavlers",
-  "main": "api/screenshot.js",
+  "main": "api/index.js",
   "scripts": {
     "dev": "vercel dev",
     "build": "echo 'No build step required'",
