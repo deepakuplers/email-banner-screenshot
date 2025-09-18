@@ -1,7 +1,7 @@
 {
-    "functions": {
-      "api/screenshot.js": {
-        "maxDuration": 30
-      }
+  "functions": {
+    "api/capture.js": {
+      "maxDuration": 30
     }
   }
+}
