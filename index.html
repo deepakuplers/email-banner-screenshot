@@ -282,6 +282,35 @@
             margin-top: 5px;
         }
 
+        /* Server Status */
+        .server-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .server-status.online {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #276749;
+        }
+
+        .server-status.offline {
+            background: #fed7d7;
+            border: 1px solid #feb2b2;
+            color: #742a2a;
+        }
+
+        .server-status.checking {
+            background: #fefcbf;
+            border: 1px solid #f6e05e;
+            color: #744210;
+        }
+
         /* Animations */
         @keyframes fadeInDown {
             from {
@@ -399,38 +428,12 @@
                 font-size: 0.95rem;
             }
         }
-
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            }
-            
-            .card {
-                background: #2d3748;
-                color: #e2e8f0;
-            }
-            
-            .card-header h2 {
-                color: #e2e8f0;
-            }
-            
-            .code-input {
-                background: #374151;
-                border-color: #4a5568;
-                color: #e2e8f0;
-            }
-            
-            .code-input:focus {
-                background: #4a5568;
-            }
-        }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1><i class="fas fa-camera-retro"></i> Screenshot Generator by Uplers/Mavlers</h1>
-        <p>Transform your code into beautiful screenshots instantly </p>
+        <h1><i class="fas fa-camera-retro"></i> HTML & CSS Screenshot Generator</h1>
+        <p>Transform your code into beautiful screenshots instantly • Professional Tool by Uplers/Mavlers</p>
     </header>
 
     <div class="container">
@@ -440,6 +443,12 @@
                 <div class="card-header">
                     <i class="fas fa-code"></i>
                     <h2>Code Input</h2>
+                </div>
+
+                <!-- Server Status -->
+                <div class="server-status checking" id="serverStatus">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Checking server connection...</span>
                 </div>
                 
                 <div class="code-input-wrapper">
@@ -524,6 +533,51 @@
 
     <script>
         let totalGenerated = 0;
+        let apiEndpoint = '';
+        let serverOnline = false;
+
+        // Determine the correct API endpoint
+        function getApiEndpoint() {
+            const hostname = window.location.hostname;
+            
+            // If running on Vercel
+            if (hostname.includes('vercel.app') || hostname.includes('vercel.com')) {
+                return `${window.location.protocol}//${window.location.host}/api/screenshot`;
+            }
+            
+            // If running on custom domain
+            if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+                return `${window.location.protocol}//${window.location.host}/api/screenshot`;
+            }
+            
+            // Fallback to localhost for development
+            return 'http://localhost:3000/api/screenshot';
+        }
+
+        // Check server status
+        async function checkServerStatus() {
+            const serverStatus = document.getElementById('serverStatus');
+            apiEndpoint = getApiEndpoint();
+            
+            try {
+                // Try to ping the server
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: '', apiKey: '1234' })
+                });
+                
+                serverOnline = true;
+                serverStatus.className = 'server-status online';
+                serverStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Server is online and ready!</span>';
+            } catch (error) {
+                serverOnline = false;
+                serverStatus.className = 'server-status offline';
+                serverStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Server offline. Endpoint: ${apiEndpoint}</span>`;
+            }
+        }
 
         // Update stats
         function updateStats() {
@@ -564,12 +618,17 @@
                 return;
             }
 
+            if (!serverOnline) {
+                showToast("Server is not available. Please check your backend deployment.", true);
+                return;
+            }
+
             // Show loading state
             generateButton.disabled = true;
             loadingSpinner.classList.add('active');
             generateButton.innerHTML = '<i class="fas fa-spinner loading active"></i> Generating...';
 
-            fetch('http://localhost:3000/api/screenshot', {
+            fetch(apiEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -578,7 +637,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
+                    throw new Error(`Server error: ${response.status} - ${response.statusText}`);
                 }
                 return response.blob();
             })
@@ -609,7 +668,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showToast("Failed to generate screenshot. Please check your server connection.", true);
+                showToast(`Failed to generate screenshot: ${error.message}`, true);
             })
             .finally(() => {
                 // Reset button state
@@ -619,14 +678,10 @@
             });
         });
 
-        // Initialize stats
-        updateStats();
-
-        // Add some sample code on load for demo
+        // Initialize
         window.addEventListener('load', function() {
-            setTimeout(() => {
-                updateStats();
-            }, 100);
+            updateStats();
+            checkServerStatus();
         });
     </script>
 </body>
